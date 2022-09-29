@@ -7,35 +7,34 @@ import java.awt.event.KeyEvent;
 
 public class MainPanel extends JPanel implements ActionListener {
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-    }
-
-
-
     static final int SCREEN_WIDTH = 500;
     static final int SCREEN_HEIGHT = 500;
-    static final int STEP = 15;
-    static final int AVAILABLE_STEPS = SCREEN_HEIGHT-100/STEP;
-    final int[] y = new int[AVAILABLE_STEPS];
+    static final int STEP = 5;
 
-    int y_position = SCREEN_HEIGHT-100;
-    {
-        for (int i = 0; i < y.length; i++) {
-            y_position -= STEP;
-            y[i] = y_position;
-        }
-    }
+    int x = 0;
+    int y = 0;
 
-    boolean running = false;
-    int i = 0;
+    int real_position_x = x + 5;
+    int real_position_y = x + 5;
+
+    int estimated_position_x = 0;
+    int estimated_position_y = 0;
+    int increment = 0;
+    int last_sensed_obstacle_x = 0;
+    int last_sensed_obstacle_y = 0;
+    int steps_of_vehicle_y_direction = 0;
+    boolean in_blind_zone = false;
 
     MainPanel(){
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+
     }
 
     public void paintComponent(Graphics graphics){
@@ -45,41 +44,85 @@ public class MainPanel extends JPanel implements ActionListener {
 
     public void draw(Graphics graphics){
 
-
-        // debug
-        for (int value : y){
-            System.out.println(value);
-        }
-
-        for (int i = 0; i < AVAILABLE_STEPS; i++) {
-
-        }
+        //upper sensor
         graphics.setColor(Color.BLUE);
-        graphics.fillRect(225, y[i], 50, 100);
+        graphics.fillRect(225, 100, 50, 50);
 
+        //blind zone
+        graphics.setColor(Color.GRAY);
+        graphics.fillRect(225, 150, 50, 100);
+
+        //bottom sensor
+        graphics.setColor(Color.BLUE);
+        graphics.fillRect(225, 250, 50, 50);
+
+        //obstacle
+        graphics.setColor(Color.RED);
+        graphics.fillRect(x, y, 10, 10);
+
+        if(real_position_x >= 225 && real_position_x <= 275
+                && real_position_y >= 100 && real_position_y <=150){
+            last_sensed_obstacle_x = real_position_x;
+            last_sensed_obstacle_y = real_position_y;
+        }
+
+        if(real_position_x >= 225 && real_position_x <= 275
+                && real_position_y >= 250 && real_position_y <= 300){
+            last_sensed_obstacle_x = real_position_x;
+            last_sensed_obstacle_y = real_position_y;
+        }
+
+        if (last_sensed_obstacle_x >= 225 && last_sensed_obstacle_x <= 275
+                && real_position_y > 150 && real_position_y < 250){
+            in_blind_zone = true;
+            estimated_position_x = real_position_x;
+            estimated_position_y = real_position_y;
+        } else {
+            in_blind_zone = false;
+        }
+
+        // text output
         graphics.setColor(Color.GREEN);
-        graphics.fillRect(195, y[i]-30,30, 30);
-        graphics.fillRect(195, y[i]+100,30, 30);
-        graphics.fillRect(275, y[i]-30,30, 30);
-        graphics.fillRect(275, y[i]+100,30, 30);
-
-        //origin
+        graphics.drawString("Real position of object: " + real_position_x + " " + real_position_y, 300, 10);
         graphics.setColor(Color.RED);
-        graphics.fillRect(250, y[i]+30, 1, 20);
-        graphics.setColor(Color.YELLOW);
-        graphics.fillRect(230,y[i]+50,20, 1);
+        graphics.drawString("Last sensed position: " + last_sensed_obstacle_x + " " + last_sensed_obstacle_y,300,25);
 
-        graphics.setColor(Color.RED);
-        graphics.fillRect(200, 100, 10, 10);
+        if(in_blind_zone){
+            graphics.setColor(Color.ORANGE);
+            graphics.drawString("In blind zone", 330, 60);
+        }
+        graphics.drawString("Estimated position of object: " + estimated_position_x + " " + estimated_position_y, 270, 40);
+
+
+    }
+
+    public void countBlindSteps(){
+        if(in_blind_zone){
+            steps_of_vehicle_y_direction++;
+        }
     }
 
     public void moveUp(){
-        i++;
+        real_position_y -= STEP;
+        y -= STEP;
         repaint();
     }
 
     public void moveDown(){
-        i--;
+        real_position_y += STEP;
+        y += STEP;
+        repaint();
+    }
+
+    public void moveLeft(){
+        real_position_x -= STEP;
+        x -= STEP;
+        repaint();
+    }
+
+    public void moveRight(){
+        real_position_x += STEP;
+        x += STEP;
         repaint();
     }
 
@@ -87,11 +130,17 @@ public class MainPanel extends JPanel implements ActionListener {
         @Override
         public void keyPressed(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_UP){
-                System.out.println("Button Pressed");
                 moveUp();
             }
             if (e.getKeyCode() == KeyEvent.VK_DOWN){
                 moveDown();
+                countBlindSteps();
+            }
+            if (e.getKeyCode() == KeyEvent.VK_LEFT){
+                moveLeft();
+            }
+            if (e.getKeyCode() == KeyEvent.VK_RIGHT){
+                moveRight();
             }
         }
     }
