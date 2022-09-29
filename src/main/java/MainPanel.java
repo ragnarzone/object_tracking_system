@@ -7,8 +7,8 @@ import java.awt.event.KeyEvent;
 
 public class MainPanel extends JPanel implements ActionListener {
 
-    static final int SCREEN_WIDTH = 500;
-    static final int SCREEN_HEIGHT = 500;
+    static final int SCREEN_WIDTH = 600;
+    static final int SCREEN_HEIGHT = 600;
     static final int STEP = 5;
 
     int x = 0;
@@ -19,7 +19,6 @@ public class MainPanel extends JPanel implements ActionListener {
 
     int estimated_position_x = 0;
     int estimated_position_y = 0;
-    int increment = 0;
     int last_sensed_obstacle_x = 0;
     int last_sensed_obstacle_y = 0;
     int steps_of_vehicle_y_direction = 0;
@@ -45,16 +44,32 @@ public class MainPanel extends JPanel implements ActionListener {
     public void draw(Graphics graphics){
 
         //upper sensor
-        graphics.setColor(Color.BLUE);
-        graphics.fillRect(225, 100, 50, 50);
+//        graphics.setColor(Color.BLUE);
+//        graphics.fillRect(225, 100, 50, 50);
 
-        //blind zone
+        //blind zones
         graphics.setColor(Color.GRAY);
-        graphics.fillRect(225, 150, 50, 100);
+        graphics.fillRect(175, 100, 100, 200);
+        graphics.fillRect(325, 100, 100, 200);
 
         //bottom sensor
+//        graphics.setColor(Color.BLUE);
+//        graphics.fillRect(225, 250, 50, 50);
+
+        //car body
+        graphics.setColor(Color.CYAN);
+        graphics.fillRect(275, 150, 50, 100);
+
         graphics.setColor(Color.BLUE);
-        graphics.fillRect(225, 250, 50, 50);
+        //top-right sensor
+        graphics.drawPolygon(new int[] {325, 325, 375}, new int[] {150, 100, 150}, 3);
+        //top-left sensor
+        graphics.drawPolygon(new int[] {275, 275, 225}, new int[] {150, 100, 150}, 3);
+        //bottom-left sensor
+        graphics.drawPolygon(new int[] {275, 275, 225}, new int[] {250, 300, 250}, 3);
+        //bottom-right sensor
+        graphics.drawPolygon(new int[] {325, 325, 375}, new int[] {250, 300, 250}, 3);
+
 
         //obstacle
         graphics.setColor(Color.RED);
@@ -91,6 +106,7 @@ public class MainPanel extends JPanel implements ActionListener {
             graphics.setColor(Color.ORANGE);
             graphics.drawString("In blind zone", 330, 60);
         }
+        graphics.setColor(Color.RED);
         graphics.drawString("Estimated position of object: " + estimated_position_x + " " + estimated_position_y, 270, 40);
 
 
