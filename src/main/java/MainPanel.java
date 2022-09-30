@@ -7,7 +7,7 @@ import java.awt.event.KeyEvent;
 
 public class MainPanel extends JPanel implements ActionListener {
 
-    static final int SCREEN_WIDTH = 600;
+    static final int SCREEN_WIDTH = 1200;
     static final int SCREEN_HEIGHT = 600;
     static final int STEP = 5;
 
@@ -98,16 +98,19 @@ public class MainPanel extends JPanel implements ActionListener {
 
         // text output
         graphics.setColor(Color.GREEN);
-        graphics.drawString("Real position of object: " + real_position_x + " " + real_position_y, 300, 10);
+        graphics.drawString("Real position of object: " + real_position_x + " " + real_position_y, 400, 10);
         graphics.setColor(Color.RED);
-        graphics.drawString("Last sensed position: " + last_sensed_obstacle_x + " " + last_sensed_obstacle_y,300,25);
+        graphics.drawString("Last sensed position: " + last_sensed_obstacle_x + " " + last_sensed_obstacle_y,400,25);
+
+        //to delete
+        graphics.drawString("This empty screen to fit 1200x600 resolution", 800, 300);
 
         if(in_blind_zone){
             graphics.setColor(Color.ORANGE);
-            graphics.drawString("In blind zone", 330, 60);
+            graphics.drawString("In blind zone!", 260, 80);
         }
         graphics.setColor(Color.RED);
-        graphics.drawString("Estimated position of object: " + estimated_position_x + " " + estimated_position_y, 270, 40);
+        graphics.drawString("Estimated position of object: " + estimated_position_x + " " + estimated_position_y, 400, 40);
 
 
     }
