@@ -3,7 +3,7 @@ import javax.swing.*;
 public class MainFrame extends JFrame {
 
 
-    MainFrame(){
+    MainFrame() throws Exception {
         this.add(new MainPanel());
         this.setTitle("Object Tracking");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

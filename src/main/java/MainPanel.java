@@ -5,11 +5,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
+
+
 public class MainPanel extends JPanel implements ActionListener {
 
-    static final int SCREEN_WIDTH = 1200;
-    static final int SCREEN_HEIGHT = 600;
-    static final int STEP = 5;
+    static final int SCREEN_WIDTH = 1600;
+    static final int SCREEN_HEIGHT = 800;
+    static final int STEP = 10;
+    static final int ORIGIN_Y = 800;
+    static final int ORIGIN_X = 400;
+
 
     int x = 0;
     int y = 0;
@@ -24,51 +29,112 @@ public class MainPanel extends JPanel implements ActionListener {
     int steps_of_vehicle_y_direction = 0;
     boolean in_blind_zone = false;
 
-    MainPanel(){
+    Timer timer;
+
+    Reader reader;
+
+    Thread t1;
+
+    MainPanel() throws Exception {
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
         this.addKeyListener(new MyKeyAdapter());
+        startThisNow();
+    }
+
+    public void startThisNow() throws Exception {
+        timer = new Timer(10, this);
+        reader = new Reader();
+        t1 = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    reader.startReading();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        t1.start();
+        timer.start();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        repaint();
     }
 
     public void paintComponent(Graphics graphics){
         super.paintComponent(graphics);
-        draw(graphics);
+        try {
+            draw(graphics);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public void draw(Graphics graphics){
-
-        //upper sensor
-//        graphics.setColor(Color.BLUE);
-//        graphics.fillRect(225, 100, 50, 50);
-
-        //blind zones
-        graphics.setColor(Color.GRAY);
-        graphics.fillRect(175, 100, 100, 200);
-        graphics.fillRect(325, 100, 100, 200);
-
-        //bottom sensor
-//        graphics.setColor(Color.BLUE);
-//        graphics.fillRect(225, 250, 50, 50);
+    public void draw(Graphics graphics) throws Exception {
 
         //car body
         graphics.setColor(Color.CYAN);
-        graphics.fillRect(275, 150, 50, 100);
+        graphics.fillRect(790, 370, 20, 40);
 
+        //corners
         graphics.setColor(Color.BLUE);
-        //top-right sensor
-        graphics.drawPolygon(new int[] {325, 325, 375}, new int[] {150, 100, 150}, 3);
-        //top-left sensor
-        graphics.drawPolygon(new int[] {275, 275, 225}, new int[] {150, 100, 150}, 3);
-        //bottom-left sensor
-        graphics.drawPolygon(new int[] {275, 275, 225}, new int[] {250, 300, 250}, 3);
-        //bottom-right sensor
-        graphics.drawPolygon(new int[] {325, 325, 375}, new int[] {250, 300, 250}, 3);
+        //sensor 0
+        graphics.drawPolygon(new int[] {790, 790, 600}, new int[] {370, 200, 370}, 3);
+
+        //sensor 1
+        graphics.drawPolygon(new int[] {810, 810, 1000}, new int[] {370, 200, 370}, 3);
+
+        //sensor 2
+        graphics.drawPolygon(new int[] {790, 790, 600}, new int[] {410, 580, 410}, 3);
+
+        //sensor 3
+        graphics.drawPolygon(new int[] {810, 810, 1000}, new int[] {410, 580, 410}, 3);
+
+
+        graphics.setColor(Color.CYAN);
+        graphics.drawString("sensor 0", 720, 320);
+        graphics.drawString("sensor 1", 830, 320);
+        graphics.drawString("sensor 2", 720, 470);
+        graphics.drawString("sensor 3", 830, 470);
+
+        //camera
+//        for (int i = 0; i < 15; i++) {
+//            if(reader.cameraObjectTypes[i] != 0){
+//                graphics.setColor(Color.GREEN);
+//                graphics.fillRect(ORIGIN_Y - reader.cameraObjectsDy[i]*STEP - 6, ORIGIN_X - reader.cameraObjectsDx[i]*STEP - 6 - 30, 12, 12);
+//                graphics.setColor(Color.RED);
+//                graphics.drawString(String.valueOf(i),ORIGIN_Y - reader.cameraObjectsDy[i]*STEP-4,ORIGIN_X - reader.cameraObjectsDx[i]*STEP-25);
+//            }
+//        }
+        //corner
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 4; j++) {
+                if(reader.cornerDx[i][j] != 0 && reader.cornerDy[i][j] != 0){
+                    graphics.setColor(Color.GREEN);
+                    graphics.fillRect(ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4,ORIGIN_X - reader.cornerDx[i][j]*STEP,8,8);
+                    graphics.setColor(Color.RED);
+                    graphics.drawString("object " + i, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP-10);
+                    graphics.drawString("sensor " + j, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP);
+                }
+
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         //obstacle
@@ -102,8 +168,7 @@ public class MainPanel extends JPanel implements ActionListener {
         graphics.setColor(Color.RED);
         graphics.drawString("Last sensed position: " + last_sensed_obstacle_x + " " + last_sensed_obstacle_y,400,25);
 
-        //to delete
-        graphics.drawString("This empty screen to fit 1200x600 resolution", 800, 300);
+
 
         if(in_blind_zone){
             graphics.setColor(Color.ORANGE);
