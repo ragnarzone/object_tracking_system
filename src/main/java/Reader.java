@@ -4,7 +4,6 @@ import java.util.Scanner;
 
 public class Reader {
 
-
     double t;
     int cameraTimeStamp;
     int[] cameraObjectsDx = new int[15];

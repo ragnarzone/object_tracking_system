@@ -12,8 +12,11 @@ public class MainPanel extends JPanel implements ActionListener {
     static final int ORIGIN_Y = 800;
     static final int ORIGIN_X = 400;
     static final int DELAY = 10;
+    static final int ALARM_AREA = 10;
 
     double[] absDistCamera = new double[15];
+    double[][] absDistCorner = new double[10][4];
+    boolean[][] savedObject = new boolean[10][4];
 
     String typeOfObject;
 
@@ -121,22 +124,37 @@ public class MainPanel extends JPanel implements ActionListener {
                 graphics.setColor(Color.MAGENTA);
                 graphics.fillRect(ORIGIN_Y - reader.cameraObjectsDy[i]*STEP - 6, ORIGIN_X - reader.cameraObjectsDx[i]*STEP - 6 - 30, 12, 12);
                 graphics.setColor(Color.GREEN);
+                graphics.setFont(new Font("Helvetica Neue", Font.BOLD, 12));
                 graphics.drawString(typeOfObject,ORIGIN_Y - reader.cameraObjectsDy[i]*STEP-4,ORIGIN_X - reader.cameraObjectsDx[i]*STEP-25);
                 graphics.drawString(String.format("Camera abs distance: %.2f",absDistCamera[i]),10,20 + i*10);
 
         }
         //corner
-//        for (int i = 0; i < 10; i++) {
-//            for (int j = 0; j < 4; j++) {
-//                if(reader.cornerDx[i][j] != 0 && reader.cornerDy[i][j] != 0){
-//                    graphics.setColor(Color.GREEN);
-//                    graphics.fillRect(ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4,ORIGIN_X - reader.cornerDx[i][j]*STEP,8,8);
-//                    graphics.setColor(Color.RED);
-//                    graphics.drawString("object " + i, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP-10);
-//                    graphics.drawString("sensor " + j, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP);
-//                }
-//
-//            }
-//        }
+        for (int i = 0; i < 10; i++) {
+            for (int j = 0; j < 4; j++) {
+                absDistCorner[i][j] = Math.sqrt(reader.cornerDx[i][j]*reader.cornerDx[i][j]
+                        +reader.cornerDy[i][j]*reader.cornerDy[i][j]);
+                graphics.setColor(Color.RED);
+                graphics.setFont(new Font("Helvetica Neue", Font.BOLD, 12));
+                graphics.drawString(String.format("Corner abs distance: %.2f",absDistCorner[i][j]),200,20+i*60+j*10);
+
+                if(absDistCorner[i][j] > 1 && absDistCorner[i][j] < 10){
+                    savedObject[i][j] = true;
+                }
+                graphics.drawString(String.valueOf(savedObject[i][j]), 400, 20+i*60+j*10);
+
+                if(reader.cornerDx[i][j] != 0 && reader.cornerDy[i][j] != 0){
+                    graphics.setColor(Color.GREEN);
+                    graphics.fillRect(ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4,ORIGIN_X - reader.cornerDx[i][j]*STEP,8,8);
+                    graphics.setColor(Color.RED);
+                    graphics.drawString("object " + i, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP-10);
+                    graphics.drawString("sensor " + j, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP);
+                    if(absDistCorner[i][j] < ALARM_AREA){
+                        graphics.setFont(new Font("Helvetica Neue", Font.BOLD, 40));
+                        graphics.drawString("Object within distance: " + ALARM_AREA + "m, don't turn the vehicle!",600,700);
+                    }
+                }
+            }
+        }
     }
 }
