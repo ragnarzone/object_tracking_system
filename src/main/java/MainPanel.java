@@ -2,9 +2,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-
 
 
 public class MainPanel extends JPanel implements ActionListener {
@@ -14,37 +11,26 @@ public class MainPanel extends JPanel implements ActionListener {
     static final int STEP = 10;
     static final int ORIGIN_Y = 800;
     static final int ORIGIN_X = 400;
+    static final int DELAY = 10;
 
+    double[] absDistCamera = new double[15];
 
-    int x = 0;
-    int y = 0;
+    String typeOfObject;
 
-    int real_position_x = x + 5;
-    int real_position_y = x + 5;
-
-    int estimated_position_x = 0;
-    int estimated_position_y = 0;
-    int last_sensed_obstacle_x = 0;
-    int last_sensed_obstacle_y = 0;
-    int steps_of_vehicle_y_direction = 0;
-    boolean in_blind_zone = false;
 
     Timer timer;
-
     Reader reader;
-
     Thread t1;
 
     MainPanel() throws Exception {
         this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
         this.setBackground(Color.BLACK);
         this.setFocusable(true);
-        this.addKeyListener(new MyKeyAdapter());
         startThisNow();
     }
 
     public void startThisNow() throws Exception {
-        timer = new Timer(3, this);
+        timer = new Timer(DELAY, this);
         reader = new Reader();
         t1 = new Thread(new Runnable() {
             @Override
@@ -75,6 +61,11 @@ public class MainPanel extends JPanel implements ActionListener {
     }
 
     public void draw(Graphics graphics) throws Exception {
+
+        //text output
+        graphics.setColor(Color.CYAN);
+        graphics.drawString("Reading from dataset and redrawing rate: " + DELAY + " ms",1200,20);
+        graphics.drawString("FoVs of sensors are arbitrary",1200,40);
 
         //car body
         graphics.setColor(Color.CYAN);
@@ -109,103 +100,43 @@ public class MainPanel extends JPanel implements ActionListener {
 
         //camera
         for (int i = 0; i < 15; i++) {
-            if(reader.cameraObjectTypes[i] != 0){
+            absDistCamera[i] = Math.sqrt((double) reader.cameraObjectsDx[i]*reader.cameraObjectsDx[i]
+                    +(double)reader.cameraObjectsDy[i]*reader.cameraObjectsDy[i]);
+            if(reader.cameraObjectTypes[i] == 1){
+                typeOfObject = "Truck";
+            } else if(reader.cameraObjectTypes[i] == 2){
+                typeOfObject = "Car";
+            } else if(reader.cameraObjectTypes[i] == 3){
+                typeOfObject = "Motorbike";
+            } else if(reader.cameraObjectTypes[i] == 4){
+                typeOfObject = "Bicycle";
+            } else if(reader.cameraObjectTypes[i] == 5){
+                typeOfObject = "Pedestrian";
+            } else if(reader.cameraObjectTypes[i] == 6){
+                typeOfObject = "Car or Truck";
+            } else {
+                typeOfObject = "Not detected";
+            }
+
                 graphics.setColor(Color.MAGENTA);
                 graphics.fillRect(ORIGIN_Y - reader.cameraObjectsDy[i]*STEP - 6, ORIGIN_X - reader.cameraObjectsDx[i]*STEP - 6 - 30, 12, 12);
                 graphics.setColor(Color.GREEN);
-                graphics.drawString(String.valueOf(i),ORIGIN_Y - reader.cameraObjectsDy[i]*STEP-4,ORIGIN_X - reader.cameraObjectsDx[i]*STEP-25);
-            }
+                graphics.drawString(typeOfObject,ORIGIN_Y - reader.cameraObjectsDy[i]*STEP-4,ORIGIN_X - reader.cameraObjectsDx[i]*STEP-25);
+                graphics.drawString(String.format("Camera abs distance: %.2f",absDistCamera[i]),10,20 + i*10);
+
         }
         //corner
-        for (int i = 0; i < 10; i++) {
-            for (int j = 0; j < 4; j++) {
-                if(reader.cornerDx[i][j] != 0 && reader.cornerDy[i][j] != 0){
-                    graphics.setColor(Color.GREEN);
-                    graphics.fillRect(ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4,ORIGIN_X - reader.cornerDx[i][j]*STEP,8,8);
-                    graphics.setColor(Color.RED);
-                    graphics.drawString("object " + i, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP-10);
-                    graphics.drawString("sensor " + j, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP);
-                }
-
-            }
-        }
-
-        //obstacle
-        graphics.setColor(Color.RED);
-        graphics.fillRect(x, y, 10, 10);
-
-        if(real_position_x >= 225 && real_position_x <= 275
-                && real_position_y >= 100 && real_position_y <=150){
-            last_sensed_obstacle_x = real_position_x;
-            last_sensed_obstacle_y = real_position_y;
-        }
-
-        if(real_position_x >= 225 && real_position_x <= 275
-                && real_position_y >= 250 && real_position_y <= 300){
-            last_sensed_obstacle_x = real_position_x;
-            last_sensed_obstacle_y = real_position_y;
-        }
-
-        if (last_sensed_obstacle_x >= 225 && last_sensed_obstacle_x <= 275
-                && real_position_y > 150 && real_position_y < 250){
-            in_blind_zone = true;
-            estimated_position_x = real_position_x;
-            estimated_position_y = real_position_y;
-        } else {
-            in_blind_zone = false;
-        }
-
-
-
+//        for (int i = 0; i < 10; i++) {
+//            for (int j = 0; j < 4; j++) {
+//                if(reader.cornerDx[i][j] != 0 && reader.cornerDy[i][j] != 0){
+//                    graphics.setColor(Color.GREEN);
+//                    graphics.fillRect(ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4,ORIGIN_X - reader.cornerDx[i][j]*STEP,8,8);
+//                    graphics.setColor(Color.RED);
+//                    graphics.drawString("object " + i, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP-10);
+//                    graphics.drawString("sensor " + j, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP);
+//                }
+//
+//            }
+//        }
     }
-
-    public void countBlindSteps(){
-        if(in_blind_zone){
-            steps_of_vehicle_y_direction++;
-        }
-    }
-
-    public void moveUp(){
-        real_position_y -= STEP;
-        y -= STEP;
-        repaint();
-    }
-
-    public void moveDown(){
-        real_position_y += STEP;
-        y += STEP;
-        repaint();
-    }
-
-    public void moveLeft(){
-        real_position_x -= STEP;
-        x -= STEP;
-        repaint();
-    }
-
-    public void moveRight(){
-        real_position_x += STEP;
-        x += STEP;
-        repaint();
-    }
-
-    public class MyKeyAdapter extends KeyAdapter{
-        @Override
-        public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_UP){
-                moveUp();
-            }
-            if (e.getKeyCode() == KeyEvent.VK_DOWN){
-                moveDown();
-                countBlindSteps();
-            }
-            if (e.getKeyCode() == KeyEvent.VK_LEFT){
-                moveLeft();
-            }
-            if (e.getKeyCode() == KeyEvent.VK_RIGHT){
-                moveRight();
-            }
-        }
-    }
-
 }
