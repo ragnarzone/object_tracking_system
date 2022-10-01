@@ -8,7 +8,7 @@ public class Starter {
 
 
         new MainFrame();
-//        File file = new File("src/main/resources/camera_and_corners.csv");
+//        File file = new File("src/main/resources/camera_and_corners1.csv");
 //        Scanner scanner = new Scanner(file);
 //        scanner.useDelimiter("[,\\n]");
 

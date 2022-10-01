@@ -14,12 +14,15 @@ public class MainPanel extends JPanel implements ActionListener {
     static final int DELAY = 10;
     static final int ALARM_AREA = 10;
 
+    boolean flag = false;
+
+    int count = 0;
+
     double[] absDistCamera = new double[15];
     double[][] absDistCorner = new double[10][4];
     boolean[][] savedObject = new boolean[10][4];
 
     String typeOfObject;
-
 
     Timer timer;
     Reader reader;
@@ -132,14 +135,35 @@ public class MainPanel extends JPanel implements ActionListener {
         //corner
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 4; j++) {
+                graphics.setColor(Color.YELLOW);
+                graphics.setFont(new Font("Helvetica Neue", Font.BOLD, 20));
+                graphics.drawString("Count of alert distance crossings: " + count, 1200,220);
+                if(count%2 == 1){
+                    graphics.drawString("Something crossed in alarm area!", 1200,200);
+                } else {
+                    graphics.drawString("Something crossed out alarm area!", 1200,200);
+                }
+                if(flag){
+                    graphics.setColor(Color.YELLOW);
+                    graphics.setFont(new Font("Helvetica Neue", Font.BOLD, 20));
+                    graphics.drawString("Blind zone!",1200,200);
+                }
                 absDistCorner[i][j] = Math.sqrt(reader.cornerDx[i][j]*reader.cornerDx[i][j]
                         +reader.cornerDy[i][j]*reader.cornerDy[i][j]);
                 graphics.setColor(Color.RED);
                 graphics.setFont(new Font("Helvetica Neue", Font.BOLD, 12));
                 graphics.drawString(String.format("Corner abs distance: %.2f",absDistCorner[i][j]),200,20+i*60+j*10);
 
-                if(absDistCorner[i][j] > 1 && absDistCorner[i][j] < 10){
-                    savedObject[i][j] = true;
+                //within 10 meter and sensed?
+                if(absDistCorner[i][j] > 1 && absDistCorner[i][j] <= 10){
+                    if(savedObject[i][j] == false && reader.cornerProb1Obstacle[i][j] > 100){
+                        savedObject[i][j] = true;
+                        count++;
+                    }
+
+                }
+                if(absDistCorner[i][j] < 1 || absDistCorner[i][j] > 10){
+                    savedObject[i][j] = false;
                 }
                 graphics.drawString(String.valueOf(savedObject[i][j]), 400, 20+i*60+j*10);
 
@@ -151,7 +175,7 @@ public class MainPanel extends JPanel implements ActionListener {
                     graphics.drawString("sensor " + j, ORIGIN_Y - reader.cornerDy[i][j]*STEP - 4 - 4, ORIGIN_X - reader.cornerDx[i][j]*STEP);
                     if(absDistCorner[i][j] < ALARM_AREA){
                         graphics.setFont(new Font("Helvetica Neue", Font.BOLD, 40));
-                        graphics.drawString("Object within distance: " + ALARM_AREA + "m, don't turn the vehicle!",600,700);
+                        graphics.drawString("Sensed within distance: " + ALARM_AREA + "m, don't turn the vehicle!",600,700);
                     }
                 }
             }
