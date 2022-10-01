@@ -108,6 +108,12 @@ public class MainPanel extends JPanel implements ActionListener {
         for (int i = 0; i < 15; i++) {
             absDistCamera[i] = Math.sqrt((double) reader.cameraObjectsDx[i]*reader.cameraObjectsDx[i]
                     +(double)reader.cameraObjectsDy[i]*reader.cameraObjectsDy[i]);
+
+            if(absDistCamera[i] < ALARM_AREA){
+                graphics.setFont(new Font("Helvetica Neue", Font.BOLD, 40));
+                graphics.drawString("Sensed within distance: " + ALARM_AREA + "m, don't turn the vehicle!",600,700);
+            }
+
             if(reader.cameraObjectTypes[i] == 1){
                 typeOfObject = "Truck";
             } else if(reader.cameraObjectTypes[i] == 2){

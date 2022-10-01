@@ -34,7 +34,7 @@ public class Reader {
     double cameraPositionZ;
 
     public void startReading() throws Exception {
-        File file = new File("src/main/resources/camera_and_corners4.csv");
+        File file = new File("src/main/resources/camera_and_corners1.csv");
         Scanner scanner = new Scanner(file);
         scanner.useDelimiter("[,\\n]");
 
