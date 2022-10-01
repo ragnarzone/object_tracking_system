@@ -44,7 +44,7 @@ public class MainPanel extends JPanel implements ActionListener {
     }
 
     public void startThisNow() throws Exception {
-        timer = new Timer(10, this);
+        timer = new Timer(3, this);
         reader = new Reader();
         t1 = new Thread(new Runnable() {
             @Override
@@ -83,16 +83,16 @@ public class MainPanel extends JPanel implements ActionListener {
         //corners
         graphics.setColor(Color.BLUE);
         //sensor 0
-        graphics.drawPolygon(new int[] {790, 790, 600}, new int[] {370, 200, 370}, 3);
+        graphics.drawPolygon(new int[] {790, 810, 600}, new int[] {370, 200, 410}, 3);
 
         //sensor 1
-        graphics.drawPolygon(new int[] {810, 810, 1000}, new int[] {370, 200, 370}, 3);
+        graphics.drawPolygon(new int[] {810, 790, 1000}, new int[] {370, 200, 410}, 3);
 
         //sensor 2
-        graphics.drawPolygon(new int[] {790, 790, 600}, new int[] {410, 580, 410}, 3);
+        graphics.drawPolygon(new int[] {790, 810, 600}, new int[] {410, 580, 390}, 3);
 
         //sensor 3
-        graphics.drawPolygon(new int[] {810, 810, 1000}, new int[] {410, 580, 410}, 3);
+        graphics.drawPolygon(new int[] {810, 790, 1000}, new int[] {410, 580, 390}, 3);
 
 
         graphics.setColor(Color.CYAN);
@@ -101,15 +101,21 @@ public class MainPanel extends JPanel implements ActionListener {
         graphics.drawString("sensor 2", 720, 470);
         graphics.drawString("sensor 3", 830, 470);
 
+        //camera zone
+        graphics.setColor(Color.YELLOW);
+        graphics.drawPolygon(new int[] {800, 550, 1050}, new int[] {390, 200, 200}, 3);
+        graphics.drawString("Camera", 780, 280);
+
+
         //camera
-//        for (int i = 0; i < 15; i++) {
-//            if(reader.cameraObjectTypes[i] != 0){
-//                graphics.setColor(Color.GREEN);
-//                graphics.fillRect(ORIGIN_Y - reader.cameraObjectsDy[i]*STEP - 6, ORIGIN_X - reader.cameraObjectsDx[i]*STEP - 6 - 30, 12, 12);
-//                graphics.setColor(Color.RED);
-//                graphics.drawString(String.valueOf(i),ORIGIN_Y - reader.cameraObjectsDy[i]*STEP-4,ORIGIN_X - reader.cameraObjectsDx[i]*STEP-25);
-//            }
-//        }
+        for (int i = 0; i < 15; i++) {
+            if(reader.cameraObjectTypes[i] != 0){
+                graphics.setColor(Color.MAGENTA);
+                graphics.fillRect(ORIGIN_Y - reader.cameraObjectsDy[i]*STEP - 6, ORIGIN_X - reader.cameraObjectsDx[i]*STEP - 6 - 30, 12, 12);
+                graphics.setColor(Color.GREEN);
+                graphics.drawString(String.valueOf(i),ORIGIN_Y - reader.cameraObjectsDy[i]*STEP-4,ORIGIN_X - reader.cameraObjectsDx[i]*STEP-25);
+            }
+        }
         //corner
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 4; j++) {
@@ -123,19 +129,6 @@ public class MainPanel extends JPanel implements ActionListener {
 
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         //obstacle
         graphics.setColor(Color.RED);
@@ -162,20 +155,6 @@ public class MainPanel extends JPanel implements ActionListener {
             in_blind_zone = false;
         }
 
-        // text output
-        graphics.setColor(Color.GREEN);
-        graphics.drawString("Real position of object: " + real_position_x + " " + real_position_y, 400, 10);
-        graphics.setColor(Color.RED);
-        graphics.drawString("Last sensed position: " + last_sensed_obstacle_x + " " + last_sensed_obstacle_y,400,25);
-
-
-
-        if(in_blind_zone){
-            graphics.setColor(Color.ORANGE);
-            graphics.drawString("In blind zone!", 260, 80);
-        }
-        graphics.setColor(Color.RED);
-        graphics.drawString("Estimated position of object: " + estimated_position_x + " " + estimated_position_y, 400, 40);
 
 
     }

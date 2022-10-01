@@ -275,7 +275,7 @@ public class Reader {
             System.out.println("Camera position Y: " + cameraPositionY);
             System.out.println("Camera position Z: " + cameraPositionZ);
 
-            Thread.sleep(10);
+            Thread.sleep(3);
         }
     }
 
